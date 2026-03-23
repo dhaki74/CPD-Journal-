@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CPD Journal">
+<meta name="theme-color" content="#1a1612">
+<title>CPD Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1612;
+    --paper: #f5f0e8;
+    --warm: #e8dfc8;
+    --accent: #7a4f3a;
+    --accent-light: #c4956a;
+    --muted: #8a7f72;
+    --tag-bg: #ede5d5;
+    --card-bg: #faf7f2;
+    --border: #d4c9b5;
+    --shadow: rgba(26,22,18,0.08);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+/* Top bar */
+.topbar {
+background: var(–ink);
+color: var(–paper);
+padding: calc(var(–safe-top) + 1rem) 1.2rem 1rem;
+display: flex;
+align-items: center;
+justify-content: space-between;
+flex-shrink: 0;
+}
+.topbar h1 { font-size: 1.15rem; font-weight: 300; letter-spacing: 0.08em; }
+.topbar-sub {
+font-family: ‘DM Mono’, monospace;
+font-size: 0.55rem;
+color: var(–accent-light);
+letter-spacing: 0.1em;
+text-transform: uppercase;
+margin-top: 0.15rem;
+}
+.topbar-add {
+background: var(–accent);
+color: #fff;
+border: none;
+border-radius: 50%;
+width: 42px; height: 42px;
+font-size: 1.5rem;
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0;
+transition: background 0.15s;
+}
+.topbar-add:active { background: var(–accent-light); }
+
+/* Search */
+.search-bar {
+background: var(–ink);
+padding: 0 1.2rem 0.9rem;
+flex-shrink: 0;
+}
+.search-inner { position: relative; }
+.search-inner svg {
+position: absolute; left: 0.75rem; top: 50%;
+transform: translateY(-50%); color: var(–muted); pointer-events: none;
+}
+input[type=“text”] {
+width: 100%;
+background: rgba(255,255,255,0.08);
+border: 1px solid rgba(255,255,255,0.12);
+border-radius: 8px;
+padding: 0.6rem 0.75rem 0.6rem 2.2rem;
+font-family: ‘DM Mono’, monospace;
+font-size: 0.72rem;
+color: var(–paper);
+outline: none;
+}
+input[type=“text”]::placeholder { color: rgba(255,255,255,0.3); }
+
+/* Filter tabs */
+.filter-tabs {
+background: var(–ink);
+padding: 0 1.2rem 1rem;
+display: flex; gap: 0.4rem;
+overflow-x: auto; flex-shrink: 0;
+scrollbar-width: none;
+}
+.filter-tabs::-webkit-scrollbar { display: none; }
+.ftab {
+background: none;
+border: 1px solid rgba(255,255,255,0.15);
+color: rgba(255,255,255,0.5);
+font-family: ‘DM Mono’, monospace;
+font-size: 0.6rem; letter-spacing: 0.08em;
+padding: 0.35rem 0.75rem;
+border-radius: 20px; white-space: nowrap;
+cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+}
+.ftab.active { background: rgba(138,171,138,0.15); border-color: #8aab8a; color: #8aab8a; }
+
+/* Stats */
+.stats-strip {
+display: flex; background: var(–warm);
+border-bottom: 1px solid var(–border); flex-shrink: 0;
+}
+.stat-item {
+flex: 1; text-align: center;
+padding: 0.6rem 0.5rem;
+border-right: 1px solid var(–border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num { font-size: 1.2rem; font-weight: 300; color: var(–accent); line-height: 1; }
+.stat-lbl {
+font-family: ‘DM Mono’, monospace; font-size: 0.5rem;
+color: var(–muted); text-transform: uppercase;
+letter-spacing: 0.08em; margin-top: 0.1rem;
+}
+
+/* Card list */
+.card-list {
+flex: 1; overflow-y: auto;
+padding: 1rem 1rem calc(var(–safe-bottom) + 1rem);
+-webkit-overflow-scrolling: touch;
+}
+.card {
+background: var(–card-bg);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 1.1rem 1.2rem;
+margin-bottom: 0.9rem;
+box-shadow: 0 2px 6px var(–shadow);
+animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:none; } }
+
+.card-meta {
+display: flex; justify-content: space-between;
+align-items: flex-start; margin-bottom: 0.5rem;
+}
+.card-date { font-family: ‘DM Mono’, monospace; font-size: 0.58rem; color: var(–muted); }
+.card-btns { display: flex; gap: 0.4rem; }
+.icon-btn {
+background: none; border: none; cursor: pointer;
+color: var(–muted); font-size: 0.8rem;
+padding: 0.1rem 0.3rem; border-radius: 4px;
+}
+.icon-btn.del:active { color: #c0392b; }
+
+.card-question {
+font-size: 1rem; font-weight: 600;
+color: var(–ink); line-height: 1.35; margin-bottom: 0.5rem;
+}
+.tag-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.7rem; }
+.tag {
+font-family: ‘DM Mono’, monospace; font-size: 0.55rem;
+letter-spacing: 0.05em; padding: 0.2rem 0.5rem;
+border-radius: 20px; text-transform: uppercase;
+}
+.tag.topic { background: var(–tag-bg); color: var(–accent); }
+.tag.source { background: #e6ede0; color: #4a6640; }
+.tag.comp { background: #e4e0ed; color: #4a3f6e; }
+
+.card-answer { font-size: 0.92rem; line-height: 1.7; color: var(–ink); }
+.card-answer.collapsed {
+display: -webkit-box; -webkit-line-clamp: 3;
+-webkit-box-orient: vertical; overflow: hidden;
+}
+.expand-btn {
+background: none; border: none;
+color: var(–accent-light);
+font-family: ‘DM Mono’, monospace; font-size: 0.6rem;
+letter-spacing: 0.08em; text-transform: uppercase;
+cursor: pointer; padding: 0.3rem 0; display: block; margin-top: 0.3rem;
+}
+.reflection-block {
+margin-top: 0.8rem; border-top: 1px dashed var(–border); padding-top: 0.7rem;
+}
+.reflection-label {
+font-family: ‘DM Mono’, monospace; font-size: 0.55rem;
+letter-spacing: 0.1em; color: var(–accent-light);
+text-transform: uppercase; margin-bottom: 0.3rem;
+}
+.reflection-text { font-size: 0.9rem; font-style: italic; color: var(–muted); line-height: 1.6; }
+
+.empty { text-align: center; padding: 3rem 1rem; color: var(–muted); }
+.empty p { font-style: italic; font-size: 1.1rem; }
+.empty small { font-family: ‘DM Mono’, monospace; font-size: 0.62rem; display: block; margin-top: 0.5rem; }
+
+/* Install banner */
+.install-banner {
+background: var(–accent); color: #fff;
+padding: 0.75rem 1.2rem;
+display: none; align-items: center;
+justify-content: space-between; gap: 1rem; flex-shrink: 0;
+}
+.install-banner.show { display: flex; }
+.install-banner p { font-size: 0.82rem; line-height: 1.4; flex: 1; }
+.install-banner small { font-family: ‘DM Mono’, monospace; font-size: 0.6rem; opacity: 0.8; display: block; }
+.install-dismiss {
+background: none; border: 1px solid rgba(255,255,255,0.4);
+color: #fff; border-radius: 6px; padding: 0.4rem 0.8rem;
+font-size: 0.75rem; cursor: pointer; white-space: nowrap;
+}
+
+/* Modal */
+.modal-overlay {
+display: none; position: fixed; inset: 0;
+background: rgba(26,22,18,0.6); z-index: 200; align-items: flex-end;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+background: var(–paper); border-radius: 20px 20px 0 0;
+padding: 1.5rem 1.5rem calc(var(–safe-bottom) + 1.5rem);
+width: 100%; max-height: 92vh; overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle {
+width: 36px; height: 4px; background: var(–border);
+border-radius: 2px; margin: 0 auto 1.2rem;
+}
+.modal h2 { font-size: 1.3rem; font-weight: 400; margin-bottom: 1.5rem; }
+
+.field { margin-bottom: 1.1rem; }
+label {
+display: block; font-family: ‘DM Mono’, monospace;
+font-size: 0.58rem; letter-spacing: 0.1em;
+text-transform: uppercase; color: var(–muted); margin-bottom: 0.35rem;
+}
+textarea, select {
+width: 100%; background: var(–card-bg);
+border: 1px solid var(–border); border-radius: 8px;
+padding: 0.65rem 0.85rem;
+font-family: ‘Cormorant Garamond’, serif; font-size: 1rem;
+color: var(–ink); outline: none; resize: none; -webkit-appearance: none;
+}
+textarea { min-height: 80px; }
+textarea:focus, select:focus { border-color: var(–accent-light); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.modal-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+.btn-cancel {
+flex: 1; background: none; border: 1px solid var(–border);
+border-radius: 10px; padding: 0.8rem;
+font-family: ‘Cormorant Garamond’, serif; font-size: 1rem;
+color: var(–muted); cursor: pointer;
+}
+.btn-save {
+flex: 2; background: var(–accent); color: #fff; border: none;
+border-radius: 10px; padding: 0.8rem;
+font-family: ‘Cormorant Garamond’, serif; font-size: 1rem;
+cursor: pointer;
+}
+.btn-save:active { background: var(–accent-light); }
+</style>
+
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>CPD Journal</h1>
+    <div class="topbar-sub">Psychotherapy Practice</div>
+  </div>
+  <button class="topbar-add" onclick="openModal()" aria-label="Add entry">+</button>
+</div>
+
+<div class="search-bar">
+  <div class="search-inner">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Search entries…" oninput="render()">
+  </div>
+</div>
+
+<div class="filter-tabs">
+  <button class="ftab active" onclick="setFilter('all',this)">All</button>
+  <button class="ftab" onclick="setFilter('topic:Attachment & Relational',this)">Attachment</button>
+  <button class="ftab" onclick="setFilter('topic:Trauma',this)">Trauma</button>
+  <button class="ftab" onclick="setFilter('topic:Neuroscience',this)">Neuroscience</button>
+  <button class="ftab" onclick="setFilter('topic:Ethics & Practice',this)">Ethics</button>
+  <button class="ftab" onclick="setFilter('topic:CBT & ACT',this)">CBT & ACT</button>
+  <button class="ftab" onclick="setFilter('topic:Supervision',this)">Supervision</button>
+  <button class="ftab" onclick="setFilter('source:Podcast',this)">Podcasts</button>
+  <button class="ftab" onclick="setFilter('source:Book',this)">Books</button>
+  <button class="ftab" onclick="setFilter('source:Training / CPD Day',this)">Training</button>
+  <button class="ftab" onclick="setFilter('competency:Reflective Practice',this)">Reflective</button>
+  <button class="ftab" onclick="setFilter('competency:Intervention',this)">Intervention</button>
+</div>
+
+<div class="stats-strip" id="statsStrip"></div>
+
+<div class="install-banner" id="installBanner">
+  <p>Add to Home Screen<small>Tap Share → "Add to Home Screen" in Safari</small></p>
+  <button class="install-dismiss" onclick="dismissInstall()">Got it</button>
+</div>
+
+<div class="card-list" id="cardList"></div>
+
+<!-- Modal -->
+
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="modalTitle">New CPD Entry</h2>
+    <div class="field">
+      <label>Question / What I heard</label>
+      <textarea id="f-question" rows="3" placeholder="What question or insight came up?"></textarea>
+    </div>
+    <div class="field">
+      <label>Answer / Learning</label>
+      <textarea id="f-answer" rows="4" placeholder="What did you learn?"></textarea>
+    </div>
+    <div class="field">
+      <label>Personal Reflection</label>
+      <textarea id="f-reflection" rows="3" placeholder="How does this apply to your practice?"></textarea>
+    </div>
+    <div class="two-col">
+      <div class="field">
+        <label>Topic</label>
+        <select id="f-topic">
+          <option>Attachment & Relational</option>
+          <option>Trauma</option>
+          <option>Neuroscience</option>
+          <option>Ethics & Practice</option>
+          <option>CBT & ACT</option>
+          <option>Supervision</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Source</label>
+        <select id="f-source">
+          <option>Podcast</option>
+          <option>Book</option>
+          <option>Article</option>
+          <option>Training / CPD Day</option>
+          <option>Supervision</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Source Name</label>
+      <textarea id="f-sourcename" rows="1" placeholder="e.g. Know Thy Self, Ep 186"></textarea>
+    </div>
+    <div class="two-col">
+      <div class="field">
+        <label>Competency</label>
+        <select id="f-competency">
+          <option value="">— Select —</option>
+          <option>Assessment</option>
+          <option>Therapeutic Relationship</option>
+          <option>Intervention</option>
+          <option>Reflective Practice</option>
+          <option>Professional Development</option>
+          <option>Ethics</option>
+          <option>Self-Care</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Date</label>
+        <textarea id="f-date" rows="1" placeholder="e.g. 23 March 2026"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEntry()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'cpd_journal_v2';
+let entries = [], editingId = null, currentFilter = 'all';
+
+function seedData() {
+  return [
+    {
+      id: 's1', date: '23 March 2026',
+      question: 'What is the therapeutic value of staying in discomfort with a client rather than moving toward solutions?',
+      answer: 'Attuned presence — naming and matching the feeling without trying to remove it — acts as co-regulation. The therapist\'s regulated nervous system is the intervention. Clients respond to your physiological state, not just your words.\n\n1. Regulate yourself first — one slow exhale before responding\n2. Name what you observe, not what to do — "I can see this is really painful"\n3. Stay in the feeling physically — slow speech, soften face, match the emotional weight\n4. Trust that feelings move through when witnessed\n5. Notice your own inner child response — the urge to fix may be about your own regulation',
+      reflection: 'This is an area I want to grow in. My instinct may be to help the client out of the feeling too quickly. I want to practise tolerating discomfort alongside them and notice when my urge to move to solutions is about my own regulation.\n\n"Feelings that are felt, heal. Feelings that are fixed, return."',
+      topic: 'Attachment & Relational', source: 'Podcast', sourceName: 'Know Thy Self, Ep 186', competency: 'Intervention'
+    },
+    {
+      id: 's2', date: '23 March 2026',
+      question: 'Using Nicola Duell Pera\'s framework, how do I truly know myself — not conceptually but really?',
+      answer: 'Self-knowledge is somatic, emotional and relational — not intellectual. Five interlocking layers:\n\n1. The Conditioned Self — patterns shaped by early survival strategies\n2. The Body as First Knower — interoception; the body responds before the mind thinks\n3. The Inner Child — parts with unmet needs that run adult behaviour\n4. Patterns & Triggers as Maps — every trigger points to an unmet need\n5. The Daily Witness Practice — "I notice I am feeling anxious" rather than "I am anxious." That shift creates space. In that space is freedom.',
+      reflection: 'I can only take a client as far as I have gone myself. If I haven\'t sat with my own discomfort, my nervous system will rush clients away from theirs. Self-knowledge is not just personal development — it is the clinical work.',
+      topic: 'Attachment & Relational', source: 'Podcast', sourceName: 'Know Thy Self, Ep 186', competency: 'Reflective Practice'
+    },
+    {
+      id: 's3', date: '23 March 2026',
+      question: 'What is attunement and why is it foundational to individuation?',
+      answer: 'Attunement is being met in your emotional state by someone who can tolerate it alongside you — shared excitement, shared vulnerability, presence without fixing or shaming. It moves a person from discomfort to something tolerable.\n\nIndividuation cannot occur without it. That mirroring tells the child their inner world is real, valid and survivable.\n\nWhen attunement is absent:\n• Suppression — emotions pushed down, self modified to keep the relationship safe\n• Explosion — no internal buffer between feeling and action\n\nBoth are the nervous system adapting to an absence of scaffolding. Neither is a character flaw.',
+      reflection: 'If I can be the attuning presence — the one who doesn\'t flinch, fix or shame — I may be offering something the client never had. The therapeutic relationship itself becomes the reparative experience. That is the buffer being built, perhaps for the first time.',
+      topic: 'Attachment & Relational', source: 'Podcast', sourceName: 'Know Thy Self, Ep 186', competency: 'Therapeutic Relationship'
+    },
+    {
+      id: 's4', date: '23 March 2026',
+      question: 'What happens to attachment when compassion, connection and safety are not consistent in childhood?',
+      answer: 'Consistency is the operative word. The nervous system needs a reliably safe caregiver to form a secure base. When care is inconsistent, the attachment system stays chronically activated — always scanning, never settling.\n\nThree insecure strategies emerge:\n• Anxious — amplify distress, stay hypervigilant, cling\n• Avoidant — suppress need; self-sufficiency as survival\n• Disorganised — caregiver is both source of fear and only available comfort; no strategy, only collapse\n\nThese patterns show up in the therapy room — in how clients relate to the therapist, and in the therapist too.\n\nThe good news: attachment is not fixed. A consistent, attuned therapeutic relationship — a corrective emotional experience — can genuinely update the nervous system\'s expectation of what relationships are.',
+      reflection: 'I want to notice which attachment pattern a client is presenting and how it activates my own. What is my attachment pattern, and when does it get pulled in the room?',
+      topic: 'Attachment & Relational', source: 'Podcast', sourceName: 'Know Thy Self, Ep 186', competency: 'Therapeutic Relationship'
+    },
+    {
+      id: 's5', date: '23 March 2026',
+      question: 'What does true individuation require — and what does it mean to truly know yourself as an embodied being?',
+      answer: 'Individuation is not transcendence alone. The path to becoming your true self requires fully embracing yourself first. Three movements are needed:\n• Transcendence — expanding beyond the conditioned self\n• Integration — bringing all parts into wholeness\n• Descendence — coming down into the body, into the present\n\nFocusing only on transcendence without integration and descendence is spiritual bypassing.\n\nTrue self-knowledge is an active practice of embodiment — not thinking about who you are but being who you are. Each person carries a unique energetic imprint. The invitation is not to narrate the self but to live it — embodied, present, whole.\n\nWe came here to have a human experience.',
+      reflection: 'This challenges me to notice when I am describing my practice rather than being present within it. The knowing is in the doing, the feeling, the showing up — not the analysis of it.',
+      topic: 'Attachment & Relational', source: 'Podcast', sourceName: 'Know Thy Self, Ep 186', competency: 'Reflective Practice'
+    },
+    {
+      id: 's6', date: '23 March 2026',
+      question: 'What is the real power of inner child work and why does it matter beyond the individual?',
+      answer: 'The past doesn\'t stay in the past — it continues to react in the present. Every unconscious pattern is the past running now.\n\nEvery moment of awareness creates the opportunity for a new choice. When we become conscious of what shaped us, we are no longer condemned to re-enact it.\n\nThe impact ripples outward:\n• Mentally and emotionally — greater stability and self-regulation\n• Relationally — relationships become more collaborative, less reactive\n• Transgenerationally — the patterns we heal do not get passed forward. No age is too late.\n\nTo choose differently rather than re-enact what once has been.',
+      reflection: 'When I help a client become aware of a pattern — even once — that awareness has transgenerational reach. That is profound and humbling. The work feels urgent and sacred.',
+      topic: 'Attachment & Relational', source: 'Podcast', sourceName: 'Know Thy Self, Ep 186', competency: 'Therapeutic Relationship'
+    }
+  ];
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    entries = raw ? JSON.parse(raw) : seedData();
+  } catch { entries = seedData(); }
+}
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(entries)); }
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  render();
+}
+
+function filtered() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  return entries.filter(e => {
+    if (currentFilter.startsWith('topic:') && e.topic !== currentFilter.slice(6)) return false;
+    if (currentFilter.startsWith('source:') && e.source !== currentFilter.slice(7)) return false;
+    if (currentFilter.startsWith('competency:') && e.competency !== currentFilter.slice(11)) return false;
+    if (q) {
+      const blob = [e.question,e.answer,e.reflection,e.sourceName,e.topic,e.competency].join(' ').toLowerCase();
+      if (!blob.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function render() {
+  const list = filtered();
+  document.getElementById('statsStrip').innerHTML = `
+    <div class="stat-item"><div class="stat-num">${entries.length}</div><div class="stat-lbl">Entries</div></div>
+    <div class="stat-item"><div class="stat-num">${new Set(entries.map(e=>e.topic)).size}</div><div class="stat-lbl">Topics</div></div>
+    <div class="stat-item"><div class="stat-num">${entries.filter(e=>e.reflection&&e.reflection.trim()).length}</div><div class="stat-lbl">Reflections</div></div>
+    <div class="stat-item"><div class="stat-num">${new Set(entries.map(e=>e.sourceName).filter(Boolean)).size}</div><div class="stat-lbl">Sources</div></div>
+  `;
+  const container = document.getElementById('cardList');
+  if (!list.length) {
+    container.innerHTML = `<div class="empty"><p>No entries found.</p><small>Try a different filter or tap + to add one.</small></div>`;
+    return;
+  }
+  container.innerHTML = list.map(e => `
+    <div class="card">
+      <div class="card-meta">
+        <div class="card-date">${esc(e.date||'')}</div>
+        <div class="card-btns">
+          <button class="icon-btn" onclick="editEntry('${e.id}')">✎</button>
+          <button class="icon-btn del" onclick="deleteEntry('${e.id}')">✕</button>
+        </div>
+      </div>
+      <div class="card-question">${esc(e.question)}</div>
+      <div class="tag-row">
+        <span class="tag topic">${esc(e.topic)}</span>
+        <span class="tag source">${esc(e.source)}${e.sourceName?' · '+esc(e.sourceName):''}</span>
+        ${e.competency?`<span class="tag comp">${esc(e.competency)}</span>`:''}
+      </div>
+      <div class="card-answer collapsed" id="ans-${e.id}">${esc(e.answer)}</div>
+      <button class="expand-btn" id="exp-${e.id}" onclick="toggleExpand('${e.id}')">Read more</button>
+      ${e.reflection?`<div class="reflection-block"><div class="reflection-label">Reflection</div><div class="reflection-text">${esc(e.reflection)}</div></div>`:''}
+    </div>
+  `).join('');
+}
+
+function toggleExpand(id) {
+  const ans = document.getElementById(`ans-${id}`);
+  const btn = document.getElementById(`exp-${id}`);
+  btn.textContent = ans.classList.toggle('collapsed') ? 'Read more' : 'Read less';
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function openModal(entry) {
+  editingId = entry ? entry.id : null;
+  document.getElementById('modalTitle').textContent = entry ? 'Edit Entry' : 'New CPD Entry';
+  document.getElementById('f-question').value = entry?.question||'';
+  document.getElementById('f-answer').value = entry?.answer||'';
+  document.getElementById('f-reflection').value = entry?.reflection||'';
+  document.getElementById('f-topic').value = entry?.topic||'Attachment & Relational';
+  document.getElementById('f-source').value = entry?.source||'Podcast';
+  document.getElementById('f-sourcename').value = entry?.sourceName||'';
+  document.getElementById('f-competency').value = entry?.competency||'';
+  document.getElementById('f-date').value = entry?.date||new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  editingId = null;
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function saveEntry() {
+  const q = document.getElementById('f-question').value.trim();
+  const a = document.getElementById('f-answer').value.trim();
+  if (!q||!a) { alert('Please fill in the Question and Answer.'); return; }
+  const entry = {
+    id: editingId||'e'+Date.now(),
+    question:q, answer:a,
+    reflection: document.getElementById('f-reflection').value.trim(),
+    topic: document.getElementById('f-topic').value,
+    source: document.getElementById('f-source').value,
+    sourceName: document.getElementById('f-sourcename').value.trim(),
+    competency: document.getElementById('f-competency').value,
+    date: document.getElementById('f-date').value.trim(),
+  };
+  if (editingId) {
+    const idx = entries.findIndex(e=>e.id===editingId);
+    if (idx>-1) entries[idx]=entry;
+  } else { entries.unshift(entry); }
+  save(); closeModal(); render();
+}
+
+function editEntry(id) { openModal(entries.find(e=>e.id===id)); }
+
+function deleteEntry(id) {
+  if (!confirm('Delete this entry?')) return;
+  entries = entries.filter(e=>e.id!==id);
+  save(); render();
+}
+
+function showInstallBanner() {
+  const isStandalone = window.navigator.standalone;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const dismissed = localStorage.getItem('install_dismissed');
+  if (isIOS && !isStandalone && !dismissed) {
+    document.getElementById('installBanner').classList.add('show');
+  }
+}
+function dismissInstall() {
+  localStorage.setItem('install_dismissed','1');
+  document.getElementById('installBanner').classList.remove('show');
+}
+
+// Register inline service worker
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE='cpd-v1';
+    self.addEventListener('install',e=>{ self.skipWaiting(); });
+    self.addEventListener('activate',e=>{ self.clients.claim(); });
+    self.addEventListener('fetch',e=>{
+      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+    });
+  `;
+  const blob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+
+load(); render(); showInstallBanner();
+</script>
+
+</body>
+</html>
